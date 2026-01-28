@@ -47,7 +47,10 @@ apply_CINP_model <- function(model_pkg, neuroimaging_feas, sex, age) {
   
   return(as.numeric(yhat))
 }
+```
 
+## Usage
+```r
 model_pkg <- readRDS("_CINP_whitematter.rds")
 
 y_pred <- apply_CINP_model(
@@ -56,6 +59,15 @@ y_pred <- apply_CINP_model(
     sex = yourdata$sex,
     age = yourdata$age
 )
+```
+## Resource
+- A causal prior used to predicting antipsychotic treatment response was provied in our work.
+
+## Contact
+Please create an issue on the github repo if you encounter any problems. You can also contact the developers through email: xiaoyang9604@gmail.com.
+
+## Citation
+
 
 
 
