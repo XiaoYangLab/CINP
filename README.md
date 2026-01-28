@@ -19,7 +19,43 @@ CINP integrates Mendenlian randomization (MR)-derived causal priors into neuroim
   - Demo data and some feature extraction template to facilitate model application on your own datasets.
 
 ## Applying the CINP wrapper
-The function below applies a trained CINP model to your neuroimaging data to predict treatment response. This wrapper is implemented in R and relies on the glmnet package:
+The function below applies a trained CINP model to your neuroimaging data to predict treatment response. This wrapper is implemented in **R** and relies on the **glmnet** package:
+
+```r
+library(glmnet)
+
+apply_CINP_model <- function(model_pkg, neuroimaging_feas, sex, age) {
+  
+  xnew <- as.matrix(neuroimaging_feas)
+  xnew <- cbind(sex, age, xnew)
+  
+  xnew <- xnew[, model_pkg$feature_name, drop = FALSE]
+  
+  xnew <- scale(
+    xnew,
+    center = model_pkg$x_center,
+    scale  = model_pkg$x_scale
+  )
+  
+  yhat <- predict(
+    model_pkg$model,
+    newx = xnew,
+    s    = model_pkg$lambda,
+    family = "gaussian",
+    standardise = FALSE
+  )
+  
+  return(as.numeric(yhat))
+}
+
+model_pkg <- readRDS("_CINP_whitematter.rds")
+
+y_pred <- apply_CINP_model(
+    model_pkg,
+    neuroimaging_feas = yourdata,
+    sex = yourdata$sex,
+    age = yourdata$age
+)
 
 
 
