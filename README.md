@@ -5,6 +5,8 @@ This repository provides the core implementation of the CINP (Causality-Informed
 
 CINP integrates Mendenlian randomization (MR)-derived causal priors into neuroimaging-based prediction by introducing feature-specific penalty factors within an elastic net regression framework.
 
+## Workflow
+
 ## Contents
 - Core code
   - Pipeline applied to train a CINP model to neuroimaging data.
