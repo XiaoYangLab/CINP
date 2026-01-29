@@ -57,7 +57,7 @@ model_pkg <- readRDS("_CINP_whitematter.rds")
 
 y_pred <- apply_CINP_model(
     model_pkg,
-    neuroimaging_feas = yourdata,
+    neuroimaging_feas = yourdata$neuroimaging_feas,
     sex = yourdata$sex,
     age = yourdata$age
 )
