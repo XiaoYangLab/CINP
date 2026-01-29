@@ -1,7 +1,7 @@
 # CINP
 CINP: a causality-informed neuroimaging prediction
 
-This repository provides the core implementation of the CINP (Causality-Informed Neuroimaging Prediction) framework, together with pre-trained models and auxiliary materials to facilitate transparent evaluation and replication.
+This repository provides the core implementation of the CINP (Causality-Informed Neuroimaging Prediction) framework, together with a trained CINP model and auxiliary materials to facilitate transparent evaluation and replication.
 
 CINP integrates Mendelian randomization (MR)-derived causal priors into neuroimaging-based prediction by introducing feature-specific penalty factors within an elastic net regression framework.
 
