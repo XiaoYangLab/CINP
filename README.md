@@ -70,6 +70,7 @@ y_pred <- apply_CINP_model(
 Please create an issue on the github repo if you encounter any problems. You can also contact the developers through email: xiaoyang9604@gmail.com.
 
 ## Citation
+Xiao Y, Li M, Liao J, Yan J, Li Z, Guo H, Pu C, Yu X, Zhang D, Yue W, Yan H. CINP: a causality-informed framework for generalizable and replicable neuroimaging prediction of antipsychotic response in schizophrenia. Biol Psychiatry. 2026 Mar 13:S0006-3223(26)01103-0. doi: 10.1016/j.biopsych.2026.03.988. Epub ahead of print. PMID: 41833746.
 
 
 
