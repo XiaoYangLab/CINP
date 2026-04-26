@@ -64,7 +64,7 @@ y_pred <- apply_CINP_model(
 )
 ```
 ## Resource
-- A causal prior used to predicting antipsychotic treatment response was provied in our work.
+- A causal prior used to predicting antipsychotic treatment response was provided in our work.
 
 ## Contact
 Please create an issue on the github repo if you encounter any problems. You can also contact the developers through email: xiaoyang9604@gmail.com.
