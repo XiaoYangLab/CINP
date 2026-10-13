@@ -80,8 +80,8 @@ for sub = 1:length(data_file)
 end
 
 %% save data
-save_25 = [net25, nodeamps25];
-save_100 = [net100, nodeamps100];
+save_25 = [nodeamps25, net25];
+save_100 = [nodeamps100, net100];
 
 names_25 = cell(1, size(save_25, 2));
 names_100 = cell(1, size(save_100, 2));
