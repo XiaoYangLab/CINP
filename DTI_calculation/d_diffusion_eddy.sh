@@ -54,51 +54,46 @@ ${FSLDIR}/bin/dtifit -k ./AP_eddy.nii.gz -m ./b0_brain_mask.nii.gz -r ./AP_eddy.
 
 #####################bb_get_b0 from ukbiobank pipeline
 ## -n is the number of b0 in dwi
-# python $tool/bb_get_b0s.py -i ./AP.nii -o ./total_B0_AP.nii -n 1 -l 100 -a bvals
+python $tool/bb_get_b0s.py -i ./AP.nii -o ./total_B0_AP.nii -n 1 -l 100 -a bvals
 
 #####################choose_bestB0 from ukbiobank pipeline
-# $tool/bb_choose_bestB0 ./total_B0_AP.nii ./B0_AP.nii
-# bestInd='cat ./total_B0_AP_best_index.txt'
+$tool/bb_choose_bestB0 ./total_B0_AP.nii ./B0_AP.nii
+bestInd='cat ./total_B0_AP_best_index.txt'
 
 #####################run topup for dMRI
-# topupValue='echo 0.67*127*0.001|bc' #echo spacing * epi facter length -1 * 0.001
-# printf '0 -1 0 $topupValue' >> ./acqparams.txt
-# topup --imain=./total_B0_AP.nii --datain=./acqparams.txt --config=$parameter /
-# topup_b02b0.cnf --out=./topup_out --fout=./topup_fout --jacout=./topup_jacout -v
+topupValue='echo 0.67*127*0.001|bc' #echo spacing * epi facter length -1 * 0.001
+printf '0 -1 0 $topupValue' >> ./acqparams.txt
+topup --imain=./total_B0_AP.nii --datain=./acqparams.txt --config=$parameter /
+topup_b02b0.cnf --out=./topup_out --fout=./topup_fout --jacout=./topup_jacout -v
 
 ## Get corrected B=0
-# ${FSLDIR}/bin/applytopup --imain=./B0_AP.nii --datain=./acqparams.txt --inindex=1 --
-# topup=./topup_out --out=./B0_AP_corr_tmp --method=jac
-# python $tool/bb_mask_negatives_4D.py -i ./B0_AP_corr_tmp.nii -o ./B0_AP_mask.nii -z
-# True
+${FSLDIR}/bin/applytopup --imain=./B0_AP.nii --datain=./acqparams.txt --inindex=1 --
+topup=./topup_out --out=./B0_AP_corr_tmp --method=jac
+python $tool/bb_mask_negatives_4D.py -i ./B0_AP_corr_tmp.nii -o ./B0_AP_mask.nii -z True
 
-# ${FSLDIR}/bin/fslmaths ./B0_AP_corr_tmp.nii -mul ./B0_AP_mask.nii ./AP_masked_tmp.nii
-# ${FSLDIR}/bin/fslmaths ./B0_AP_corr_tmp.nii -add ./AP_masked_tmp.nii ./B0_AP_fixed_tmp.nii
-# mv ./B0_AP_fixed_tmp.nii ./topup_iout.nii
+${FSLDIR}/bin/fslmaths ./B0_AP_corr_tmp.nii -mul ./B0_AP_mask.nii ./AP_masked_tmp.nii
+${FSLDIR}/bin/fslmaths ./B0_AP_corr_tmp.nii -add ./AP_masked_tmp.nii ./B0_AP_fixed_tmp.nii
+mv ./B0_AP_fixed_tmp.nii ./topup_iout.nii
 
-# $tool/bb_GDC --workingdir = ./topup_iout_GDC/ --in=./topup_iout.nii --out=./topup_iout_ud.nii.gz --owarp=./topup_iout_ud_warp.nii
-# $tool/bb_epi_reg --epi=./B0_AP.nii --t1=../T1_nii/*.nii --t1brain=../T1_nii/T1_brain.nii --out=./B0_to_T1 
-# --wmseg=../T1/T1fast/T1_brain_WM_mask.nii
+$tool/bb_GDC --workingdir = ./topup_iout_GDC/ --in=./topup_iout.nii --out=./topup_iout_ud.nii.gz --owarp=./topup_iout_ud_warp.nii
+$tool/bb_epi_reg --epi=./B0_AP.nii --t1=../T1_nii/*.nii --t1brain=../T1_nii/T1_brain.nii --out=./B0_to_T1 --wmseg=../T1/T1fast/T1_brain_WM_mask.nii
 
 ## generate a mask for topup output by inverting the previous registration and applying it to T1 brain mask
-# ${FSLDIR}/bin/convert_xfm -omat ./T1_to_B0.mat -inverse ./B0_to_T1.mat
-# ${FSLDIR}/bin/fslmaths ../T1/T1fast/T1_brain_mask.nii -thr 0.1 -kernel sphere 1.1 -dilF -bin 
-# -fillh ../T1/T1fast/T1_brain_mask_dil.nii
-# ${FSLDIR}/bin/flirt -in ../T1/T1fast/T1_brain_mask_dil.nii -ref ./topup_iout.nii -applyxfm -init ./T1_to_B0.mat 
-# -out ./topup_mask_ud.nii -interp trilinear
-# ${FSLDIR}/bin/fslmaths ./topup_mask_ud.nii -thr 0.25 -bin -fillh ./topup_mask_ud.nii
+${FSLDIR}/bin/convert_xfm -omat ./T1_to_B0.mat -inverse ./B0_to_T1.mat
+${FSLDIR}/bin/fslmaths ../T1/T1fast/T1_brain_mask.nii -thr 0.1 -kernel sphere 1.1 -dilF -bin -fillh ../T1/T1fast/T1_brain_mask_dil.nii
+${FSLDIR}/bin/flirt -in ../T1/T1fast/T1_brain_mask_dil.nii -ref ./topup_iout.nii -applyxfm -init ./T1_to_B0.mat -out ./topup_mask_ud.nii -interp trilinear
+${FSLDIR}/bin/fslmaths ./topup_mask_ud.nii -thr 0.25 -bin -fillh ./topup_mask_ud.nii
 
 ## warp the dilated T1 brain mask to the gradient distored space by inverting the mat
-# ${FSLDIR}/bin/invwarp --ref=./topup_iout_ud.nii -w ./topup_iout_ud_warp.nii -o ./topup_iout_mean_ud_inv_warp.nii
-# ${FSLDIR}/bin/applywarp --rel -i ../T1/T1fast/T1_brain_mask_dil.nii -r ./topup_iout.nii -o ./topup_mask.nii 
-# --premat=./T1_to_B0.mat -w ./topup_iout_mean_ud_inv_warp.nii --interp=trilinear
-# ${FSLDIR}/bin/fslmaths ./topup_mask.nii -thr 0.25 -bin -fillh ./topup_mask.nii
+${FSLDIR}/bin/invwarp --ref=./topup_iout_ud.nii -w ./topup_iout_ud_warp.nii -o ./topup_iout_mean_ud_inv_warp.nii
+${FSLDIR}/bin/applywarp --rel -i ../T1/T1fast/T1_brain_mask_dil.nii -r ./topup_iout.nii -o ./topup_mask.nii --premat=./T1_to_B0.mat -w ./topup_iout_mean_ud_inv_warp.nii --interp=trilinear
+${FSLDIR}/bin/fslmaths ./topup_mask.nii -thr 0.25 -bin -fillh ./topup_mask.nii
 
 ## eddy
-# ${FSLDIR}/bin/eddy --imain=./AP.nii --mask=./topup_mask.nii --topup=./topup_out --acqp=./acqparams.txt --index=./eddy_index.txt --#bvecs=./bvecs --bvals=./bvals --out=./data --ref_scan_no=$bestInd --flm=quadratic --resamp=jac --slm=linear --fwhm=2 --ff=5 --#sep_offs_move --nvoxhp=1000 --very_verbose --repol --rms
+${FSLDIR}/bin/eddy --imain=./AP.nii --mask=./topup_mask.nii --topup=./topup_out --acqp=./acqparams.txt --index=./eddy_index.txt --#bvecs=./bvecs --bvals=./bvals --out=./data --ref_scan_no=$bestInd --flm=quadratic --resamp=jac --slm=linear --fwhm=2 --ff=5 --#sep_offs_move --nvoxhp=1000 --very_verbose --repol --rms
 
 #dtifit for FA MD MO
-#dtifit -k ./data_ud_1_shell -m ./topup_mask_ud -r ./data_ud_1_shell.bvec -b ./data_ud_1_shell.bval -o ./dti
+dtifit -k ./data_ud_1_shell -m ./topup_mask_ud -r ./data_ud_1_shell.bvec -b ./data_ud_1_shell.bval -o ./dti
 
 
 done
